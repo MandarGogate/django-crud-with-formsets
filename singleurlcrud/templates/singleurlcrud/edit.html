@@ -1,0 +1,93 @@
+{% extends base_template %}
+{% load i18n staticfiles bootstrap3 crud_tags %}
+{% block extrastyle %}
+{{ media }}
+{% endblock %}
+{% block content %}
+<form id="formEdit" role="form" action="" method="post">
+    {% csrf_token %}
+    {% if popup %}
+    <script type="text/javascript" charset="utf-8">
+        _popup = true;
+    </script>
+    <input type='hidden' name='_popup' value='1'/>
+    {% endif %}
+    {% if form_haserrors %}
+        <input id="id_form_haserrors" type="hidden" value="1">
+    {% endif %}
+    {% bootstrap_form form %}
+    {% if formset %}
+    <div id="id_formset">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">{{ formset.model|verbose_name_plural }}</h4>
+        </div>
+        <div class='panel-body'>
+            {{ formset.management_form }}
+            {% bootstrap_formset_errors formset %}
+            <table class="table table-condensed" id="id_items_table">
+                <thead>
+                    {% for field in formset.forms.0 %}
+                        {% if not field.is_hidden %}
+                            {% if not field.name == 'DELETE' %}
+                            <th>{{ field.label }}</th>
+                            {% else %}
+                            <th>{% trans "Remove" %}</th>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </thead>
+                <tbody>
+                    {% for form in formset %}
+                    {% if form.non_field_errors %}
+                    {% comment %}
+                    We set colspan to an arbitrarily large number that can cover
+                    most use cases. And when colspan value exceeds the number of
+                    columns in the table row, browser automatically normalizes it
+                    to the max columns as defined in thead. Thus we get a 
+                    full row of error messages. 
+                    {% endcomment %}
+                    <tr><td colspan="15">{% bootstrap_form_errors form %}</td></tr>
+                    {% endif %}
+                    <tr class="formset-row {% if forloop.last %}empty-form{%endif%}"
+                         id="{{ formset.prefix }}-{% if not forloop.last %}{{ forloop.counter0 }}{% else %}empty{% endif %}">
+                        {% for field in form %}
+                            {% if not field.is_hidden %}
+                                <td>{% bootstrap_field field show_label=False %}</td>
+                            {% else %}
+                                <div style='display:none;'>{% bootstrap_field field show_label=False %}</div>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    </div>
+    {% endif %}
+    <div class="form-group">
+        <button id="itemSubmit" type="submit" class="btn btn-primary">{% trans 'Save' %}</button>
+        <button id="idCancelEdit" type="button" class="btn btn-default" onclick="cancelEdit();">{% trans "Cancel" %}</button>
+    </div>
+</form>
+{% if formset %}
+<script type="text/javascript">
+function onRowAddedThunk(row) {
+    if (typeof onRowAdded == "function") { onRowAdded(row); }
+}
+function onRowRemovedThunk(row) {
+    if (typeof onRowRemoved == "function") { onRowRemoved(row); }
+}
+(function($) {
+  $("#id_formset tbody tr").formset({
+    prefix: "{{ formset.prefix }}",
+    addText: "{% trans "Add another" %}",
+    deleteText: "<span class='glyphicon glyphicon-trash' alt='{% trans "Remove" %}'></span>",
+    added: onRowAddedThunk,
+    removed: onRowRemovedThunk,
+  });
+})(django.jQuery);
+</script>
+{% endif %}
+{% endblock content %}

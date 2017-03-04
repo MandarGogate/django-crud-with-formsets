@@ -1,0 +1,8 @@
+/* crud.css */
+.item-selection-checkbox {
+}
+.not { display: none; }
+.change-existing-disabled { opacity: 0.3; }
+.change-existing, .change-existing:hover, 
+.add-another, .add-another:hover { text-decoration: none; }
+

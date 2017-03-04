@@ -1,0 +1,22 @@
+{% extends base_template %}
+{% load i18n staticfiles bootstrap3 %}
+{% block extrastyle %}
+{{ media }}
+{% endblock extrastyle %}
+{% block content %}
+<form id="formDelete" role="form" action="" method="post">
+    {% csrf_token %}
+    <p><span id="msgDeleteConfirm">{{ delete_msg }}</span></p>
+    {% if objects|length %}
+    <ul>
+    {% for object in objects %}
+        <li>{{ object }}</li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+    <div class="form-group">
+        <button id="idYes" type="submit" class="btn btn-primary">{% trans "Yes" %}</button>
+        <a id='idNo' class="btn btn-default" href="javascript:void(0);" onclick="cancelDelete()">{% trans "No" %}</a>
+    </div>
+</form>
+{% endblock content %}
